@@ -1,10 +1,14 @@
 package com.adrynun.datadinner.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * DTO usado para recibir datos de un pedido desde el frontend.
+ * DTO usado para **CREAR** un pedido desde cero.
+ * Requiere la mesa, el usuario y los productos iniciales.
+ * CRÍTICO: Utiliza PedidoProductoRequestDTO que solo contiene productoId y
+ * cantidad.
  */
 public class PedidoRequestDTO {
 
@@ -15,11 +19,14 @@ public class PedidoRequestDTO {
     private Integer usuarioId;
 
     @NotNull(message = "Debe incluir al menos un producto")
-    private List<PedidoProductoDTO> productos;
+    @NotEmpty(message = "La lista de productos no puede estar vacía")
+    // Se cambia PedidoProductoDTO por la versión de Request
+    private List<PedidoProductoRequestDTO> productos;
 
-    public PedidoRequestDTO() {}
+    public PedidoRequestDTO() {
+    }
 
-    public PedidoRequestDTO(Integer mesaId, Integer usuarioId, List<PedidoProductoDTO> productos) {
+    public PedidoRequestDTO(Integer mesaId, Integer usuarioId, List<PedidoProductoRequestDTO> productos) {
         this.mesaId = mesaId;
         this.usuarioId = usuarioId;
         this.productos = productos;
@@ -42,11 +49,11 @@ public class PedidoRequestDTO {
         this.usuarioId = usuarioId;
     }
 
-    public List<PedidoProductoDTO> getProductos() {
+    public List<PedidoProductoRequestDTO> getProductos() {
         return productos;
     }
 
-    public void setProductos(List<PedidoProductoDTO> productos) {
+    public void setProductos(List<PedidoProductoRequestDTO> productos) {
         this.productos = productos;
     }
 }

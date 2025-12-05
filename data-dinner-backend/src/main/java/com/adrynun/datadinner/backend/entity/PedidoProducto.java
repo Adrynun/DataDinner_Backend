@@ -1,6 +1,10 @@
 package com.adrynun.datadinner.backend.entity;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -37,14 +41,21 @@ public class PedidoProducto {
     @Column(nullable = false)
     private int cantidad;
 
-    /** Constructor vacío requerido por JPA */
-    public PedidoProducto() {}
+    @NotNull(message = "El precio unitario es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser positivo")
+    @Column(name = "precio_unitario", nullable = false)
+    private BigDecimal precioUnitario;
 
-    /** Constructor completo */
-    public PedidoProducto(Pedido pedido, Producto producto, int cantidad) {
+    /** Constructor vacío requerido por JPA */
+    public PedidoProducto() {
+    }
+
+    /** Constructor completo (usado por el Service Layer) */
+    public PedidoProducto(Pedido pedido, Producto producto, int cantidad, BigDecimal precioUnitario) {
         this.pedido = pedido;
         this.producto = producto;
         this.cantidad = cantidad;
+        this.precioUnitario = precioUnitario;
     }
 
     // -------------------- Getters y Setters --------------------
@@ -79,5 +90,33 @@ public class PedidoProducto {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public BigDecimal getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(BigDecimal precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
+
+    // -------------------- equals() y hashCode() --------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        PedidoProducto that = (PedidoProducto) o;
+        // La identidad se basa en el ID (si ya está persistido)
+        return id != 0 && id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        // Usa el ID solo si no es 0. Si es 0, usa un valor constante para no romper las
+        // colecciones.
+        return id != 0 ? Objects.hash(id) : Objects.hash(pedido, producto);
     }
 }

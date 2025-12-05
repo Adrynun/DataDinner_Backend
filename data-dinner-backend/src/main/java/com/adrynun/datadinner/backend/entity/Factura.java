@@ -27,7 +27,7 @@ public class Factura {
      * Pedido asociado a esta factura.
      * Un pedido puede tener una factura asociada.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 

@@ -1,5 +1,6 @@
 package com.adrynun.datadinner.backend.mapper;
 
+import com.adrynun.datadinner.backend.dto.ActualizarPedidoRequestDTO;
 import com.adrynun.datadinner.backend.dto.PedidoRequestDTO;
 import com.adrynun.datadinner.backend.dto.PedidoResponseDTO;
 import com.adrynun.datadinner.backend.entity.Mesa;
@@ -13,9 +14,10 @@ import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Mapper para convertir entre Pedido, PedidoRequestDTO y PedidoResponseDTO.
- * Esta clase es abstracta para permitir la inyección de servicios (Service Injection)
- * necesaria para resolver las relaciones.
+ * Mapper para convertir entre Pedido, PedidoRequestDTO,
+ * ActualizarPedidoRequestDTO y PedidoResponseDTO.
+ * Usa PedidoProductoMapper (la versión que maneja Request/Response) para la
+ * colección.
  */
 @Mapper(componentModel = "spring", uses = { PedidoProductoMapper.class })
 public abstract class PedidoMapper {
@@ -26,67 +28,66 @@ public abstract class PedidoMapper {
     @Autowired
     protected UsuarioService usuarioService;
 
-    // Inyección para usar en el servicio, solucionando el error PedidoMapperJava(67108964)
     @Autowired
-    protected PedidoProductoMapper pedidoProductoMapper; 
+    // Inyección del PedidoProductoMapper actualizado (que mapea Request/Response)
+    protected PedidoProductoMapper pedidoProductoMapper;
 
-    // --- Métodos de Mapeo a Entidad ---
+    // --- Mapeo a Entidad (Creación) ---
 
-    /**
-     * Convierte el DTO de solicitud a la entidad Pedido.
-     * Ignora el ID y delega la resolución de IDs de Mesa y Usuario a los métodos auxiliares.
-     */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "estado", ignore = true) // El estado se asigna en el servicio (PENDIENTE)
-    @Mapping(target = "fechaHora", ignore = true) // La fecha/hora se asigna en el servicio
+    @Mapping(target = "estado", ignore = true)
+    @Mapping(target = "fechaHora", ignore = true)
+    @Mapping(target = "total", ignore = true) // El total se calcula en el servicio
     @Mapping(target = "mesa", source = "mesaId")
     @Mapping(target = "usuario", source = "usuarioId")
+    // MapStruct mapeará List<PedidoProductoRequestDTO> a List<PedidoProducto>
+    // usando PedidoProductoMapper
     @Mapping(target = "productos", source = "productos")
     public abstract Pedido toEntity(PedidoRequestDTO dto);
 
+    // --- Mapeo de Actualización de Pedido (Metadata: Mesa/Usuario) ---
+
     /**
-     * Método de fusión para actualizar una entidad existente con un DTO.
-     * Ignora el ID, estado y fechaHora para que no sean sobrescritos por el DTO de entrada.
+     * Método de fusión para actualizar una entidad Pedido existente con un DTO de
+     * Request.
+     * Este método se usaría si se desea cambiar la Mesa o el Usuario asociado.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "estado", ignore = true)
     @Mapping(target = "fechaHora", ignore = true)
+    @Mapping(target = "total", ignore = true)
     @Mapping(target = "mesa", source = "mesaId")
     @Mapping(target = "usuario", source = "usuarioId")
     @Mapping(target = "productos", ignore = true) // La colección se gestiona manualmente en el servicio
     public abstract void updateEntityFromDto(PedidoRequestDTO dto, @MappingTarget Pedido entity);
 
-    // --- Métodos de Mapeo a DTO de Respuesta ---
+    // --- Mapeo a DTO de Respuesta ---
 
     /**
      * Convierte la entidad Pedido al DTO de respuesta.
-     * Mapea los objetos Mesa y Usuario a sus IDs.
+     * Mapea los IDs y obtiene el nombre de la mesa y usuario.
      */
     @Mapping(target = "mesaId", source = "mesa.id")
     @Mapping(target = "usuarioId", source = "usuario.id")
+    @Mapping(target = "numeroMesa", source = "mesa.numero")
+    @Mapping(target = "usuarioNombre", source = "usuario.nombreUsuario")
+    // MapStruct mapeará List<PedidoProducto> a List<PedidoProductoResponseDTO>
     @Mapping(target = "productos", source = "productos")
     public abstract PedidoResponseDTO toResponseDTO(Pedido entity);
-
 
     // --- Métodos de Resolución de Relaciones (Many-to-One) ---
 
     protected Mesa resolveMesa(Integer mesaId) {
-        if (mesaId == null) return null;
+        if (mesaId == null)
+            return null;
+        // Asume que este método existe y lanza NotFoundException si no lo encuentra
         return mesaService.getMesaEntityById(mesaId);
     }
 
     protected Usuario resolveUsuario(Integer usuarioId) {
-        if (usuarioId == null) return null;
+        if (usuarioId == null)
+            return null;
+        // Asume que este método existe y lanza NotFoundException si no lo encuentra
         return usuarioService.getUsuarioEntityById(usuarioId);
-    }
-
-    // --- Método para exponer el Mapper de PedidoProducto (Fix para el error 2) ---
-
-    /**
-     * Expone el PedidoProductoMapper inyectado para ser usado en la capa de servicio
-     * al manejar la actualización manual de la colección.
-     */
-    public PedidoProductoMapper getPedidoProductoMapper() {
-        return pedidoProductoMapper;
     }
 }

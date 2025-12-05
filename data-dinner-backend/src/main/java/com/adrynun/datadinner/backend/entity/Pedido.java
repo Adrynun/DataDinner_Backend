@@ -1,16 +1,17 @@
 package com.adrynun.datadinner.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Representa un pedido realizado en el restaurante.
- * 
- * Cada pedido está asociado a una mesa y a un usuario (camarero),
- * y contiene una lista de productos a través de la entidad PedidoProducto.
+ * CRÍTICO: Se añade el campo 'total' para evitar recálculos en las consultas.
  */
 @Entity
 @Table(name = "pedidos")
@@ -31,21 +32,40 @@ public class Pedido {
     @Column(nullable = false)
     private Estado estado;
 
-    /** Usuario que registró el pedido */
+    /** Total calculado del pedido (para rendimiento) */
+    @NotNull(message = "El total del pedido es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El total no puede ser negativo")
+    @Column(nullable = false)
+    private BigDecimal total = BigDecimal.ZERO;
+
+    /** Usuario que registró el pedido (LAZY loading) */
     @NotNull(message = "El usuario es obligatorio")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Siempre LAZY para ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    /** Mesa asociada al pedido */
+    /** Mesa asociada al pedido (LAZY loading) */
     @NotNull(message = "La mesa es obligatoria")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mesa_id", nullable = false)
     private Mesa mesa;
 
-    /** Lista de productos incluidos en el pedido */
+    /**
+     * Lista de productos incluidos en el pedido.
+     * La cascada es necesaria aquí: si eliminas el pedido, se eliminan sus líneas.
+     */
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoProducto> productos = new ArrayList<>();
+
+    /**
+     * CORRECCIÓN: Relación OneToMany con las facturas generadas a partir de este
+     * pedido.
+     * Añadimos CascadeType.REMOVE para eliminar las facturas si se elimina el
+     * Pedido,
+     * resolviendo el error de clave foránea.
+     */
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Factura> facturas = new ArrayList<>();
 
     /** Estados posibles de un pedido */
     public enum Estado {
@@ -53,13 +73,15 @@ public class Pedido {
     }
 
     /** Constructor vacío requerido por JPA */
-    public Pedido() {}
+    public Pedido() {
+    }
 
     /** Constructor con usuario y mesa */
     public Pedido(Usuario usuario, Mesa mesa) {
         this.usuario = usuario;
         this.mesa = mesa;
         this.estado = Estado.EN_PREPARACION;
+        this.total = BigDecimal.ZERO;
     }
 
     // -------------------- Getters y Setters --------------------
@@ -88,6 +110,14 @@ public class Pedido {
         this.estado = estado;
     }
 
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
     public Usuario getUsuario() {
         return usuario;
     }
@@ -112,8 +142,29 @@ public class Pedido {
         this.productos = productos;
     }
 
-    public void setEstado(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setEstado'");
+    public List<Factura> getFacturas() {
+        return facturas;
+    }
+
+    public void setFacturas(List<Factura> facturas) {
+        this.facturas = facturas;
+    }
+
+    // -------------------- equals() y hashCode() --------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Pedido pedido = (Pedido) o;
+        // La identidad se basa en el ID
+        return id != 0 && id == pedido.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != 0 ? Objects.hash(id) : Objects.hash(fechaHora, usuario, mesa);
     }
 }

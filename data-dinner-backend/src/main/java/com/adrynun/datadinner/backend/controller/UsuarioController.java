@@ -1,5 +1,6 @@
 package com.adrynun.datadinner.backend.controller;
 
+import com.adrynun.datadinner.backend.dto.UsuarioCreateRequest; // IMPORTACIÓN NECESARIA
 import com.adrynun.datadinner.backend.dto.UsuarioDTO;
 import com.adrynun.datadinner.backend.service.UsuarioService;
 
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -43,9 +43,10 @@ public class UsuarioController {
     // -------------------------------------------------------
     @PostMapping
     public ResponseEntity<UsuarioDTO> createUsuario(
-            @Valid @RequestBody UsuarioDTO usuarioRequestDTO) {
+            @Valid @RequestBody UsuarioCreateRequest usuarioRequest) { // Usamos el DTO de Request
 
-        UsuarioDTO created = usuarioService.saveUsuario(usuarioRequestDTO);
+        // Llamamos a saveUsuario con el DTO de Request que incluye el 'pass'
+        UsuarioDTO created = usuarioService.saveUsuario(usuarioRequest);
         return ResponseEntity.ok(created);
     }
 
@@ -55,9 +56,10 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> updateUsuario(
             @PathVariable Integer id,
-            @Valid @RequestBody UsuarioDTO usuarioRequestDTO) {
+            @Valid @RequestBody UsuarioCreateRequest usuarioRequest) { // Usamos el DTO de Request
 
-        UsuarioDTO updated = usuarioService.saveUsuario(usuarioRequestDTO);
+        // Llamamos al método updateUsuario con el ID y el DTO de Request
+        UsuarioDTO updated = usuarioService.updateUsuario(id, usuarioRequest);
         return ResponseEntity.ok(updated);
     }
 

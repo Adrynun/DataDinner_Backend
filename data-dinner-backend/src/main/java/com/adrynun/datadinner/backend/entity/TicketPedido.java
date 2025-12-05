@@ -2,11 +2,11 @@ package com.adrynun.datadinner.backend.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Entidad que representa un ticket de un pedido.
- * Un ticket refleja la cuenta generada por un pedido,
- * con su total y estado de pago.
+ * Utiliza el Enum TicketEstado para el estado.
  */
 @Entity
 @Table(name = "ticket_pedido")
@@ -16,29 +16,27 @@ public class TicketPedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**
-     * Pedido al que pertenece este ticket.
-     */
-    @ManyToOne
+    /** Pedido al que pertenece este ticket (LAZY loading) */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
-    /**
-     * Total del ticket.
-     */
+    /** Total del ticket. */
     @Column(nullable = false)
     private BigDecimal total;
 
     /**
-     * Estado del ticket: PENDIENTE o COBRADO.
+     * Estado del ticket: PENDIENTE o COBRADO (ahora con Enum).
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado;
+    private TicketEstado estado;
 
     // Constructores
-    public TicketPedido() {}
+    public TicketPedido() {
+    }
 
-    public TicketPedido(Pedido pedido, BigDecimal total, String estado) {
+    public TicketPedido(Pedido pedido, BigDecimal total, TicketEstado estado) {
         this.pedido = pedido;
         this.total = total;
         this.estado = estado;
@@ -69,11 +67,28 @@ public class TicketPedido {
         this.total = total;
     }
 
-    public String getEstado() {
+    public TicketEstado getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(TicketEstado estado) {
         this.estado = estado;
+    }
+
+    // -------------------- equals() y hashCode() --------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        TicketPedido that = (TicketPedido) o;
+        return id != 0 && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != 0 ? Objects.hash(id) : Objects.hash(pedido, total);
     }
 }

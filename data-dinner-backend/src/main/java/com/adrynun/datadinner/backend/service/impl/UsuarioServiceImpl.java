@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.adrynun.datadinner.backend.dto.UsuarioCreateRequest;
 import com.adrynun.datadinner.backend.dto.UsuarioDTO;
 import com.adrynun.datadinner.backend.entity.Usuario;
+import com.adrynun.datadinner.backend.entity.Usuario.Rol;
 import com.adrynun.datadinner.backend.exception.AuthException;
 import com.adrynun.datadinner.backend.exception.UsuarioNotFoundException;
 import com.adrynun.datadinner.backend.mapper.UsuarioMapper;
@@ -38,22 +41,30 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioDTO getUsuarioById(int id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new UsuarioNotFoundException("Usuario con id " + id + " no encontrado"));
+        Usuario usuario = getUsuarioEntityById(id);
         return usuarioMapper.toDTO(usuario);
     }
 
     @Override
-    public UsuarioDTO saveUsuario(UsuarioDTO usuarioDTO) {
-        Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
+    @Transactional
+    public UsuarioDTO saveUsuario(UsuarioCreateRequest request) { // Sincronizado con UsuarioService
+        // 1. Mapear de Request DTO a Entidad
+        Usuario usuario = usuarioMapper.toEntity(request);
+
+        // 2. Asignar el rol (MapStruct podría fallar al mapear String a Enum)
+        usuario.setRol(Rol.valueOf(request.getRol().toUpperCase()));
+
+        // NOTA: Aquí debería ir el cifrado de la contraseña (BCrypt) en un entorno
+        // real.
+        // Por ahora, se guarda tal cual.
+
         Usuario saved = usuarioRepository.save(usuario);
         return usuarioMapper.toDTO(saved);
     }
 
     @Override
     public void deleteUsuario(int id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new UsuarioNotFoundException("Usuario con id " + id + " no encontrado"));
+        Usuario usuario = getUsuarioEntityById(id);
         usuarioRepository.delete(usuario);
     }
 
@@ -62,6 +73,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
                 .orElseThrow(() -> new AuthException("Usuario no encontrado: " + nombreUsuario));
 
+        // NOTA: En un entorno real, la contraseña (PIN) nunca se almacenaría en texto
+        // plano.
+        // Se usaría BCryptPasswordEncoder o similar.
         if (usuario.getPass().equals(pin)) {
             return usuarioMapper.toDTO(usuario);
         } else {
@@ -70,8 +84,29 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
+    public UsuarioDTO updateUsuario(Integer id, UsuarioCreateRequest request) { // Sincronizado con UsuarioService
+        Usuario existingUsuario = getUsuarioEntityById(id);
+
+        // Actualizar los campos que vienen en el Request DTO
+        usuarioMapper.updateEntityFromRequest(request, existingUsuario);
+
+        // Asignar el rol (MapStruct podría fallar al mapear String a Enum)
+        existingUsuario.setRol(Rol.valueOf(request.getRol().toUpperCase()));
+
+        // Si el request trae una nueva contraseña, la actualizamos
+        if (request.getPass() != null && !request.getPass().isEmpty()) {
+            existingUsuario.setPass(request.getPass());
+        }
+
+        Usuario updated = usuarioRepository.save(existingUsuario);
+        return usuarioMapper.toDTO(updated);
+    }
+
+    @Override
     public Usuario getUsuarioEntityById(Integer usuarioId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsuarioEntityById'");
+        // Implementación real para ser usada por mappers y otros servicios
+        return usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuario con id " + usuarioId + " no encontrado"));
     }
 }

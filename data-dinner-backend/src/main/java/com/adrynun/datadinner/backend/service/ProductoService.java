@@ -1,6 +1,7 @@
 package com.adrynun.datadinner.backend.service;
 
 import com.adrynun.datadinner.backend.dto.ProductoDTO;
+import com.adrynun.datadinner.backend.entity.Producto;
 
 import java.util.List;
 
@@ -12,12 +13,14 @@ public interface ProductoService {
 
     /**
      * Devuelve todos los productos.
+     * 
      * @return Lista de ProductoDTO
      */
     List<ProductoDTO> getAllProductos();
 
     /**
      * Devuelve un producto por su ID.
+     * 
      * @param id ID del producto
      * @return ProductoDTO correspondiente
      */
@@ -25,6 +28,7 @@ public interface ProductoService {
 
     /**
      * Crea o actualiza un producto.
+     * 
      * @param productoDTO DTO del producto a guardar
      * @return ProductoDTO guardado
      */
@@ -32,16 +36,27 @@ public interface ProductoService {
 
     /**
      * Elimina un producto por su ID.
+     * 
      * @param id ID del producto a eliminar
      */
     void deleteProducto(int id);
 
     /**
      * Devuelve todos los productos de una categoría específica.
+     * 
      * @param categoriaId ID de la categoría
      * @return Lista de ProductoDTO
      */
     List<ProductoDTO> getProductosByCategoriaId(int categoriaId);
 
     ProductoDTO updateProducto(Integer id, ProductoDTO productoDTO);
+
+    /**
+     * Devuelve la entidad Producto por su ID.
+     * Este método es necesario para la resolución de relaciones en los mappers.
+     * 
+     * @param id ID del producto
+     * @return Entidad Producto
+     */
+    Producto getProductoEntityById(Integer id);
 }

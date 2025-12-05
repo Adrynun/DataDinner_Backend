@@ -2,6 +2,7 @@ package com.adrynun.datadinner.backend.service.impl;
 
 import com.adrynun.datadinner.backend.dto.TicketPedidoDTO;
 import com.adrynun.datadinner.backend.entity.TicketPedido;
+import com.adrynun.datadinner.backend.entity.TicketEstado;
 import com.adrynun.datadinner.backend.exception.TicketPedidoNotFoundException;
 import com.adrynun.datadinner.backend.mapper.TicketPedidoMapper;
 import com.adrynun.datadinner.backend.repository.TicketPedidoRepository;
@@ -35,7 +36,8 @@ public class TicketPedidoServiceImpl implements TicketPedidoService {
 
     @Override
     public List<TicketPedidoDTO> getTicketsPendientes() {
-        return repository.findByEstado("PENDIENTE").stream()
+        // Buscamos por el valor string del Enum (asumiendo que el repositorio espera un String)
+        return repository.findByEstado(TicketEstado.PENDIENTE.toString()).stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -44,7 +46,10 @@ public class TicketPedidoServiceImpl implements TicketPedidoService {
     public TicketPedidoDTO marcarCobrado(int id) {
         TicketPedido ticket = repository.findById(id)
                 .orElseThrow(() -> new TicketPedidoNotFoundException("Ticket no encontrado: " + id));
-        ticket.setEstado("COBRADO");
+        
+        // CORREGIDO: Usar el Enum TicketEstado
+        ticket.setEstado(TicketEstado.COBRADO);
+        
         TicketPedido updated = repository.save(ticket);
         return mapper.toDTO(updated);
     }

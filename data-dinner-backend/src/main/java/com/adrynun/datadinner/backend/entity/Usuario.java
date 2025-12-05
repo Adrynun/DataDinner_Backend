@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * Entidad que representa a un usuario del sistema.
- * Un usuario puede ser de tipo ADMIN o CAMARERO y puede tener varios pedidos asociados.
+ * Un usuario puede ser de tipo ADMIN o CAMARERO y puede tener varios pedidos
+ * asociados.
  */
 @Entity
 @Table(name = "usuarios")
@@ -25,7 +26,7 @@ public class Usuario {
     private String nombreUsuario;
 
     @NotBlank(message = "La contraseña no puede estar vacía")
-    @Size(min = 4, max = 255, message = "La contraseña debe tener al menos 4 caracteres")
+    @Size(min = 2, max = 8, message = "La contraseña (PIN) debe tener entre 4 y 8 caracteres")
     @Column(name = "pass", nullable = false, length = 255)
     private String pass;
 
@@ -33,7 +34,7 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "usuario")
     private List<Pedido> pedidos = new ArrayList<>();
 
     /**
@@ -45,7 +46,8 @@ public class Usuario {
     }
 
     // Constructores
-    public Usuario() {}
+    public Usuario() {
+    }
 
     public Usuario(String nombreUsuario, String pass, Rol rol) {
         this.nombreUsuario = nombreUsuario;

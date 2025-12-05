@@ -1,10 +1,12 @@
 package com.adrynun.datadinner.backend.dto;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal; // Importación necesaria
 import java.util.List;
 
 /**
- * DTO usado para enviar información de un pedido al frontend.
+ * DTO usado para enviar información completa de un pedido al frontend.
+ * Ahora incluye el campo 'total' y usa PedidoProductoResponseDTO.
  */
 public class PedidoResponseDTO {
 
@@ -14,40 +16,32 @@ public class PedidoResponseDTO {
 
     private String estado;
 
+    private BigDecimal total; // CRÍTICO: Añadido para mostrar el total del pedido
+
     private Integer mesaId;
 
     private Integer usuarioId;
-
-    public String getUsuarioNombre() {
-        return usuarioNombre;
-    }
-
-    public void setUsuarioNombre(String usuarioNombre) {
-        this.usuarioNombre = usuarioNombre;
-    }
 
     private String usuarioNombre;
 
     private Integer numeroMesa;
 
-    public Integer getNumeroMesa() {
-        return numeroMesa;
+    // Se cambia a la versión de Response
+    private List<PedidoProductoResponseDTO> productos;
+
+    public PedidoResponseDTO() {
     }
 
-    public void setNumeroMesa(Integer numeroMesa) {
-        this.numeroMesa = numeroMesa;
-    }
-
-    private List<PedidoProductoDTO> productos;
-
-    public PedidoResponseDTO() {}
-
-    public PedidoResponseDTO(Integer id, LocalDateTime fechaHora, String estado, Integer mesaId, Integer usuarioId, List<PedidoProductoDTO> productos) {
+    public PedidoResponseDTO(Integer id, LocalDateTime fechaHora, String estado, BigDecimal total, Integer mesaId,
+            Integer usuarioId, String usuarioNombre, Integer numeroMesa, List<PedidoProductoResponseDTO> productos) {
         this.id = id;
         this.fechaHora = fechaHora;
         this.estado = estado;
+        this.total = total;
         this.mesaId = mesaId;
         this.usuarioId = usuarioId;
+        this.usuarioNombre = usuarioNombre;
+        this.numeroMesa = numeroMesa;
         this.productos = productos;
     }
 
@@ -76,6 +70,14 @@ public class PedidoResponseDTO {
         this.estado = estado;
     }
 
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
     public Integer getMesaId() {
         return mesaId;
     }
@@ -92,11 +94,27 @@ public class PedidoResponseDTO {
         this.usuarioId = usuarioId;
     }
 
-    public List<PedidoProductoDTO> getProductos() {
+    public String getUsuarioNombre() {
+        return usuarioNombre;
+    }
+
+    public void setUsuarioNombre(String usuarioNombre) {
+        this.usuarioNombre = usuarioNombre;
+    }
+
+    public Integer getNumeroMesa() {
+        return numeroMesa;
+    }
+
+    public void setNumeroMesa(Integer numeroMesa) {
+        this.numeroMesa = numeroMesa;
+    }
+
+    public List<PedidoProductoResponseDTO> getProductos() {
         return productos;
     }
 
-    public void setProductos(List<PedidoProductoDTO> productos) {
+    public void setProductos(List<PedidoProductoResponseDTO> productos) {
         this.productos = productos;
     }
 }

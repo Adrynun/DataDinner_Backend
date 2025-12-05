@@ -3,16 +3,18 @@ package com.adrynun.datadinner.backend.service.impl;
 import com.adrynun.datadinner.backend.dto.PedidoRequestDTO;
 import com.adrynun.datadinner.backend.dto.PedidoResponseDTO;
 import com.adrynun.datadinner.backend.entity.Pedido;
+import com.adrynun.datadinner.backend.entity.Pedido.Estado;
 import com.adrynun.datadinner.backend.entity.PedidoProducto;
 import com.adrynun.datadinner.backend.exception.PedidoNotFoundException;
 import com.adrynun.datadinner.backend.mapper.PedidoMapper;
+import com.adrynun.datadinner.backend.mapper.PedidoProductoMapper;
 import com.adrynun.datadinner.backend.repository.PedidoRepository;
 import com.adrynun.datadinner.backend.service.PedidoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +28,16 @@ public class PedidoServiceImpl implements PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final PedidoMapper pedidoMapper;
+    private final PedidoProductoMapper pedidoProductoMapper; // Inyección directa
 
-    public PedidoServiceImpl(PedidoRepository pedidoRepository, PedidoMapper pedidoMapper) {
+    // CONSTRUCTOR
+    public PedidoServiceImpl(
+            PedidoRepository pedidoRepository,
+            PedidoMapper pedidoMapper,
+            PedidoProductoMapper pedidoProductoMapper) {
         this.pedidoRepository = pedidoRepository;
         this.pedidoMapper = pedidoMapper;
+        this.pedidoProductoMapper = pedidoProductoMapper;
     }
 
     @Override
@@ -48,19 +56,32 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public PedidoResponseDTO savePedido(PedidoRequestDTO pedidoRequest) {
-        // En la creación, asignamos la fecha y el estado iniciales
+        // 1. Mapeo inicial, asignación de fecha y estado
         Pedido pedido = pedidoMapper.toEntity(pedidoRequest);
         pedido.setFechaHora(LocalDateTime.now());
-        pedido.setEstado("PENDIENTE");
+        pedido.setEstado(Estado.PENDIENTE);
 
-        // Aseguramos la bidireccionalidad en la lista de PedidoProducto antes de
-        // guardar
+        // 2. Asegurar la bidireccionalidad y calcular el total del pedido
         if (pedido.getProductos() != null) {
+            BigDecimal totalCalculado = BigDecimal.ZERO;
             for (PedidoProducto pp : pedido.getProductos()) {
                 pp.setPedido(pedido);
+
+                // *** LÓGICA DE CÁLCULO DEL TOTAL AGREGADA AQUÍ ***
+                // Se asume que el mapper (o un paso previo) ya cargó el precioUnitario
+                // en el objeto PedidoProducto antes de llegar a este punto.
+                if (pp.getPrecioUnitario() != null) {
+                    BigDecimal subtotal = pp.getPrecioUnitario().multiply(BigDecimal.valueOf(pp.getCantidad()));
+                    totalCalculado = totalCalculado.add(subtotal);
+                }
+                // ************************************************
             }
+            pedido.setTotal(totalCalculado);
+        } else {
+            pedido.setTotal(BigDecimal.ZERO);
         }
 
+        // 3. Guardar el Pedido
         Pedido saved = pedidoRepository.save(pedido);
         return pedidoMapper.toResponseDTO(saved);
     }
@@ -71,30 +92,34 @@ public class PedidoServiceImpl implements PedidoService {
         // 1. Obtener la entidad existente
         Pedido existingPedido = getPedidoEntityById(id);
 
-        // 2. Usar MapStruct para fusionar los campos básicos (Mesa, Usuario, etc.)
-        // La lógica para convertir IDs a Entidades está en el PedidoMapper
+        // 2. Usar MapStruct para fusionar los campos básicos (Mesa, Usuario, estado
+        // etc.)
         pedidoMapper.updateEntityFromDto(pedidoRequest, existingPedido);
 
         // 3. Manejar la colección anidada (PedidoProducto)
-        // **CRÍTICO: Limpiar y repoblar la lista para activar orphanRemoval=true**
-
-        // Limpiamos la colección existente (esto eliminará los registros huérfanos de
-        // la DB)
         existingPedido.getProductos().clear();
 
-        // Mapeamos los DTOs de PedidoProducto a entidades PedidoProducto
         List<PedidoProducto> newProductos = pedidoRequest.getProductos().stream()
-                .map(pedidoMapper.getPedidoProductoMapper()::toEntity) // Usamos el mapper de PP
+                .map(pedidoProductoMapper::toEntity)
                 .collect(Collectors.toList());
 
-        // Repoblamos la colección con los nuevos ítems
+        // 4. Repoblar la colección, asegurar bidireccionalidad y **RECALCULAR EL
+        // TOTAL**
+        BigDecimal totalCalculado = BigDecimal.ZERO;
+
         for (PedidoProducto pp : newProductos) {
-            // Aseguramos la bidireccionalidad para JPA
             pp.setPedido(existingPedido);
             existingPedido.getProductos().add(pp);
-        }
 
-        // 4. Guardar los cambios (JPA persistirá automáticamente la colección)
+            // *** LÓGICA DE CÁLCULO DEL TOTAL APLICADA EN UPDATE ***
+            if (pp.getPrecioUnitario() != null) {
+                BigDecimal subtotal = pp.getPrecioUnitario().multiply(BigDecimal.valueOf(pp.getCantidad()));
+                totalCalculado = totalCalculado.add(subtotal);
+            }
+        }
+        existingPedido.setTotal(totalCalculado);
+
+        // 5. Guardar los cambios
         Pedido updated = pedidoRepository.save(existingPedido);
 
         return pedidoMapper.toResponseDTO(updated);
@@ -102,6 +127,8 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public void deletePedido(int id) {
+        // NOTA: Para que esto funcione, la Entidad Pedido debe tener configurado
+        // CascadeType.REMOVE en su relación @OneToMany con Factura (ver corrección 2).
         Pedido pedido = getPedidoEntityById(id);
         pedidoRepository.delete(pedido);
     }

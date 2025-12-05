@@ -38,7 +38,7 @@ public class Producto {
      * Categoría a la que pertenece el producto.
      * Relación muchos a uno.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 

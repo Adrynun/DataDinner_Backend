@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 /**
  * Implementación de la interfaz MesaService.
- * Gestiona las mesas usando repositorio y mapper para convertir entre entidad y DTO.
+ * Gestiona las mesas usando repositorio y mapper para convertir entre entidad y
+ * DTO.
  */
 @Service
 public class MesaServiceImpl implements MesaService {
@@ -35,8 +36,7 @@ public class MesaServiceImpl implements MesaService {
 
     @Override
     public MesaDTO getMesaById(int id) {
-        Mesa mesa = mesaRepository.findById(id)
-                .orElseThrow(() -> new MesaNotFoundException("Mesa con id " + id + " no encontrada"));
+        Mesa mesa = getMesaEntityById(id);
         return mesaMapper.toDTO(mesa);
     }
 
@@ -49,14 +49,13 @@ public class MesaServiceImpl implements MesaService {
 
     @Override
     public void deleteMesa(int id) {
-        Mesa mesa = mesaRepository.findById(id)
-                .orElseThrow(() -> new MesaNotFoundException("Mesa con id " + id + " no encontrada"));
+        Mesa mesa = getMesaEntityById(id);
         mesaRepository.delete(mesa);
     }
 
     @Override
     public Mesa getMesaEntityById(Integer mesaId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMesaEntityById'");
+        return mesaRepository.findById(mesaId)
+                .orElseThrow(() -> new MesaNotFoundException("Mesa con id " + mesaId + " no encontrada"));
     }
 }

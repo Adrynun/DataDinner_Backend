@@ -36,14 +36,13 @@ public interface PedidoService {
     PedidoResponseDTO savePedido(PedidoRequestDTO pedidoRequest);
 
     /**
-     * Actualiza un pedido existente.
-     * Es responsable de buscar el Pedido original, aplicar los cambios del DTO
-     * (incluyendo la actualización de la lista de productos anidados) y guardarlo.
-     * 
-     * @param id            ID del pedido a actualizar
-     * @param pedidoRequest DTO con los datos actualizados
-     * @return PedidoResponseDTO del pedido actualizado
-     */
+     * Actualiza un pedido existente.
+     * Es responsable de buscar el Pedido original, aplicar los cambios del DTO
+     * (incluyendo la actualización de la lista de productos anidados) y guardarlo.
+     * @param id            ID del pedido a actualizar
+     * @param pedidoRequest DTO con los datos actualizados
+     * @return PedidoResponseDTO del pedido actualizado
+     */
     PedidoResponseDTO updatePedido(Integer id, PedidoRequestDTO pedidoRequest);
 
     /**

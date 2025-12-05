@@ -41,9 +41,8 @@ public class Mesa {
 
     /**
      * Relación OneToMany con los pedidos de la mesa.
-     * Se elimina en cascada si la mesa se elimina.
      */
-    @OneToMany(mappedBy = "mesa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "mesa")
     private List<Pedido> pedidos = new ArrayList<>();
 
     /**

@@ -1,6 +1,7 @@
 package com.adrynun.datadinner.backend.controller;
 
-import com.adrynun.datadinner.backend.dto.PedidoProductoDTO;
+import com.adrynun.datadinner.backend.dto.PedidoProductoRequestDTO;
+import com.adrynun.datadinner.backend.dto.PedidoProductoResponseDTO;
 import com.adrynun.datadinner.backend.service.PedidoProductoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,34 +22,40 @@ public class PedidoProductoController {
         this.pedidoProductoService = pedidoProductoService;
     }
 
-    // 1. Listar todos los PedidoProducto
+    // 1. Listar todos los PedidoProducto (Usa ResponseDTO para salida)
     @GetMapping
-    public ResponseEntity<List<PedidoProductoDTO>> getAll() {
+    public ResponseEntity<List<PedidoProductoResponseDTO>> getAll() {
+        // Corrección del error 1: El servicio devuelve List<PedidoProductoResponseDTO>
         return ResponseEntity.ok(pedidoProductoService.getAll());
     }
 
-    // 2. Obtener uno por ID
+    // 2. Obtener uno por ID (Usa ResponseDTO para salida)
     @GetMapping("/{id}")
-    public ResponseEntity<PedidoProductoDTO> getById(@PathVariable Integer id) {
+    public ResponseEntity<PedidoProductoResponseDTO> getById(@PathVariable Integer id) {
+        // Corrección del error 2: El servicio devuelve PedidoProductoResponseDTO
         return ResponseEntity.ok(pedidoProductoService.getById(id));
     }
 
-    // 3. Crear un PedidoProducto
+    // 3. Crear un PedidoProducto (Usa RequestDTO para entrada y ResponseDTO para
+    // salida)
     @PostMapping
-    public ResponseEntity<PedidoProductoDTO> create(
-            @Valid @RequestBody PedidoProductoDTO dto) {
+    public ResponseEntity<PedidoProductoResponseDTO> create(
+            // Corrección del error 3: Usa RequestDTO para la entrada
+            @Valid @RequestBody PedidoProductoRequestDTO dto) {
 
-        PedidoProductoDTO created = pedidoProductoService.create(dto);
+        PedidoProductoResponseDTO created = pedidoProductoService.create(dto);
         return ResponseEntity.ok(created);
     }
 
-    // 4. Actualizar un PedidoProducto existente
+    // 4. Actualizar un PedidoProducto existente (Usa RequestDTO para entrada y
+    // ResponseDTO para salida)
     @PutMapping("/{id}")
-    public ResponseEntity<PedidoProductoDTO> update(
+    public ResponseEntity<PedidoProductoResponseDTO> update(
             @PathVariable Integer id,
-            @Valid @RequestBody PedidoProductoDTO dto) {
+            // Corrección del error 4: Usa RequestDTO para la entrada
+            @Valid @RequestBody PedidoProductoRequestDTO dto) {
 
-        PedidoProductoDTO updated = pedidoProductoService.update(id, dto);
+        PedidoProductoResponseDTO updated = pedidoProductoService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 
