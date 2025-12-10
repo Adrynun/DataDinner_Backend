@@ -50,7 +50,7 @@ public class PedidoProducto {
     public PedidoProducto() {
     }
 
-    /** Constructor completo (usado por el Service Layer) */
+    /** Constructor completo  */
     public PedidoProducto(Pedido pedido, Producto producto, int cantidad, BigDecimal precioUnitario) {
         this.pedido = pedido;
         this.producto = producto;
