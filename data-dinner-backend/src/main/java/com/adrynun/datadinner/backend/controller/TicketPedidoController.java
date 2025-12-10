@@ -1,6 +1,9 @@
 package com.adrynun.datadinner.backend.controller;
 
 import com.adrynun.datadinner.backend.service.JasperReportService;
+
+import net.sf.jasperreports.engine.JRException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +24,7 @@ public class TicketPedidoController {
     // Generar ticket PDF de un pedido
     // --------------------------------------------------
     @GetMapping("/pedido/{pedidoId}")
-    public ResponseEntity<byte[]> generarTicket(@PathVariable Integer pedidoId) {
+    public ResponseEntity<byte[]> generarTicket(@PathVariable Integer pedidoId) throws JRException {
 
         byte[] pdfBytes = jasperReportService.generarTicket(pedidoId);
 

@@ -84,6 +84,29 @@ public class Pedido {
         this.total = BigDecimal.ZERO;
     }
 
+    /**
+     * Calcula el total del pedido sumando el subtotal de cada PedidoProducto.
+     * Este método se usa en la capa de servicio, no debe ser usado para
+     * persistencia
+     * ya que el campo 'total' ya existe.
+     * 
+     * @return El total calculado (BigDecimal).
+     */
+    public BigDecimal calcularTotal() {
+        if (this.productos == null || this.productos.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        // Suma el precio total de cada PedidoProducto
+        BigDecimal totalCalculado = this.productos.stream()
+                // Map: Calcula el subtotal de cada línea: precio * cantidad
+                .map(pp -> pp.getPrecioUnitario().multiply(new BigDecimal(pp.getCantidad())))
+                // Reduce: Suma todos los subtotales
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return totalCalculado;
+    }
+
     // -------------------- Getters y Setters --------------------
 
     public int getId() {

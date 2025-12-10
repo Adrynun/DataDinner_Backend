@@ -1,104 +1,163 @@
-<!-- Created with Jaspersoft Studio version 7.0.1.final using JasperReports Library version 7.0.1-573496633c2b4074e32f433154b543003f7d2498  -->
-<jasperReport name="ticket_factura" language="java" pageWidth="226" pageHeight="842" columnWidth="206" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="46e84f8e-c591-4cbc-959b-3835d12e4099">
-	<parameter name="pedidoId" class="java.lang.Integer"/>
-	<parameter name="fecha" class="java.time.LocalDateTime"/>
-	<parameter name="mesa" class="java.lang.Integer"/>
-	<parameter name="usuario" class="java.lang.String"/>
-	<parameter name="IVA_PORCENTAJE" class="java.math.BigDecimal">
-		<defaultValueExpression><![CDATA[new java.math.BigDecimal("0.21")]]></defaultValueExpression>
-	</parameter>
-	<field name="producto.nombre" class="java.lang.String"/>
-	<field name="precioUnitario" class="java.math.BigDecimal"/>
-	<field name="cantidad" class="java.lang.Integer"/>
-	<variable name="LINEA_SUBTOTAL" class="java.math.BigDecimal">
-		<expression><![CDATA[$F{precioUnitario}.multiply(new java.math.BigDecimal($F{cantidad}))]]></expression>
-	</variable>
-	<variable name="SUBTOTAL_PEDIDO" calculation="Sum" class="java.math.BigDecimal">
-		<expression><![CDATA[$V{LINEA_SUBTOTAL}]]></expression>
-	</variable>
-	<variable name="IVA_MONTO" class="java.math.BigDecimal">
-		<expression><![CDATA[$V{SUBTOTAL_PEDIDO}.multiply($P{IVA_PORCENTAJE})]]></expression>
-	</variable>
-	<variable name="TOTAL_PEDIDO" class="java.math.BigDecimal">
-		<expression><![CDATA[$V{SUBTOTAL_PEDIDO}.add($V{IVA_MONTO})]]></expression>
-	</variable>
-	<title height="65">
-		<element kind="staticText" uuid="0cffe68f-1c55-4ce4-8eed-7604d33e80d9" x="0" y="0" width="206" height="15" fontSize="10.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Restaurante DataDinner]]></text>
-		</element>
-		<element kind="staticText" uuid="55c65a7e-128a-4c2f-b413-56839a859600" x="0" y="15" width="206" height="10" fontSize="7.0" hTextAlign="Center">
-			<text><![CDATA[C/ Ejemplo, 123 - Ciudad]]></text>
-		</element>
-		<element kind="staticText" uuid="7890b21a-d460-444a-9b1e-08c3523f66c2" x="0" y="27" width="206" height="8" fontSize="6.0" hTextAlign="Center">
-			<text><![CDATA[------------------------------------------------------------------------------------------------------------------------------------]]></text>
-		</element>
-		<element kind="textField" uuid="f2e2d73a-8898-4962-8926-1bbc22cc25b2" x="0" y="35" width="206" height="10" fontSize="8.0" hTextAlign="Center">
-			<expression><![CDATA["PEDIDO N.º " + $P{pedidoId} + " | MESA " + $P{mesa}]]></expression>
-		</element>
-		<element kind="textField" uuid="a3c9b83a-8898-4962-8926-1bbc22cc25b2" x="0" y="45" width="206" height="10" fontSize="8.0" hTextAlign="Center">
-			<expression><![CDATA["Atendido por: " + $P{usuario}]]></expression>
-		</element>
-		<element kind="textField" uuid="c2b1a83a-8898-4962-8926-1bbc22cc25b2" x="0" y="55" width="206" height="10" fontSize="8.0" pattern="dd/MM/yyyy HH:mm:ss" hTextAlign="Center">
-			<expression><![CDATA[$P{fecha}]]></expression>
-		</element>
-	</title>
-	<columnHeader height="20">
-		<element kind="staticText" uuid="3d213a7e-128a-4c2f-b413-56839a859600" x="0" y="0" width="206" height="3" fontSize="6.0" hTextAlign="Center">
-			<text><![CDATA[====================================================================================================================================]]></text>
-		</element>
-		<element kind="staticText" uuid="ef4e0096-57af-4d02-9ee9-4640e818daf4" x="0" y="3" width="96" height="12" fontSize="8.0">
-			<text><![CDATA[Producto]]></text>
-		</element>
-		<element kind="staticText" uuid="12a9d613-713a-465b-9646-cde9ad893c07" x="96" y="3" width="40" height="12" fontSize="8.0" hTextAlign="Right">
-			<text><![CDATA[Cant.]]></text>
-		</element>
-		<element kind="staticText" uuid="117e0c31-c071-45c6-a037-50aa1da33be7" x="136" y="3" width="70" height="12" fontSize="8.0" hTextAlign="Right">
-			<text><![CDATA[Subtotal]]></text>
-		</element>
-		<element kind="staticText" uuid="4b873a7e-128a-4c2f-b413-56839a859600" x="0" y="15" width="206" height="3" fontSize="6.0" hTextAlign="Center">
-			<text><![CDATA[------------------------------------------------------------------------------------------------------------------------------------]]></text>
-		</element>
-	</columnHeader>
-	<detail>
-		<band height="12">
-			<element kind="textField" uuid="fc2e7734-41f3-419e-9f28-f6775f2eb26c" x="0" y="0" width="96" height="12" fontSize="8.0">
-				<expression><![CDATA[$F{producto.nombre}]]></expression>
-			</element>
-			<element kind="textField" uuid="0ae3ed78-0ff1-4ea3-891d-9e5502346b8d" x="96" y="0" width="40" height="12" fontSize="8.0" hTextAlign="Right">
-				<expression><![CDATA[$F{cantidad}]]></expression>
-			</element>
-			<element kind="textField" uuid="1def01b6-64d7-47ab-9422-2da94d5e30a6" x="136" y="0" width="70" height="12" fontSize="8.0" pattern="#,##0.00 €" hTextAlign="Right">
-				<expression><![CDATA[$V{LINEA_SUBTOTAL}]]></expression>
-			</element>
-		</band>
-	</detail>
-	<summary height="75">
-		<element kind="staticText" uuid="5c783a7e-128a-4c2f-b413-56839a859600" x="0" y="0" width="206" height="3" fontSize="6.0" hTextAlign="Center">
-			<text><![CDATA[====================================================================================================================================]]></text>
-		</element>
-		<element kind="staticText" uuid="c3f0b21a-d460-444a-9b1e-08c3523f66c2" x="100" y="5" width="50" height="10" fontSize="8.0" hTextAlign="Left">
-			<text><![CDATA[SUBTOTAL:]]></text>
-		</element>
-		<element kind="textField" uuid="c2f0b21a-d460-444a-9b1e-08c3523f66c2" x="150" y="5" width="56" height="10" fontSize="8.0" pattern="#,##0.00 €" hTextAlign="Right">
-			<expression><![CDATA[$V{SUBTOTAL_PEDIDO}]]></expression>
-		</element>
-		<element kind="textField" uuid="e3f0b21a-d460-444a-9b1e-08c3523f66c2" x="100" y="15" width="50" height="10" fontSize="8.0" hTextAlign="Left">
-			<expression><![CDATA["IVA (" + ($P{IVA_PORCENTAJE}.multiply(new java.math.BigDecimal("100"))) + "%):"]]></expression>
-		</element>
-		<element kind="textField" uuid="e2f0b21a-d460-444a-9b1e-08c3523f66c2" x="150" y="15" width="56" height="10" fontSize="8.0" pattern="#,##0.00 €" hTextAlign="Right">
-			<expression><![CDATA[$V{IVA_MONTO}]]></expression>
-		</element>
-		<element kind="staticText" uuid="01eade99-5766-4e02-9c91-b2792199e90b" x="0" y="30" width="150" height="12" fontSize="9.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
-			<text><![CDATA[TOTAL A PAGAR:]]></text>
-		</element>
-		<element kind="textField" uuid="163d3903-cb1c-4171-9821-83da9db046c5" x="150" y="30" width="56" height="12" fontSize="10.0" pattern="#,##0.00 €" bold="true" hTextAlign="Right" vTextAlign="Middle">
-			<expression><![CDATA[$V{TOTAL_PEDIDO}]]></expression>
-		</element>
-		<element kind="staticText" uuid="6d873a7e-128a-4c2f-b413-56839a859600" x="0" y="45" width="206" height="3" fontSize="6.0" hTextAlign="Center">
-			<text><![CDATA[------------------------------------------------------------------------------------------------------------------------------------]]></text>
-		</element>
-		<element kind="staticText" uuid="7575c275-2d5c-4b2f-9af3-36c2895dcb5c" x="0" y="55" width="206" height="15" fontSize="8.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[¡GRACIAS POR SU VISITA! VUELVA PRONTO.]]></text>
-		</element>
-	</summary>
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                                  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="ticket_pedido"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              uuid="a1111111-b222-4c33-8d44-f55555555555">
+    
+    <parameter name="idPedido" class="java.lang.Integer"/>
+    <parameter name="fechaPedido" class="java.lang.String"/>
+    <parameter name="nombreCliente" class="java.lang.String"/>
+    <parameter name="mesa" class="java.lang.String"/>
+    <parameter name="totalPedido" class="java.math.BigDecimal"/>
+    
+    <field name="producto" class="com.adrynun.datadinner.backend.entity.PedidoProducto"/>
+    
+    <title>
+        <band height="120">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="30" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000000"/>
+                <textElement textAlignment="Center">
+                    <font size="20" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DATA DINNER]]></text>
+            </staticText>
+            
+            <staticText>
+                <reportElement x="0" y="35" width="555" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000001"/>
+                <textElement textAlignment="Center">
+                    <font size="12"/>
+                </textElement>
+                <text><![CDATA[Ticket de Pedido]]></text>
+            </staticText>
+            
+            <line>
+                <reportElement x="0" y="65" width="555" height="1" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000002"/>
+            </line>
+            
+            <textField>
+                <reportElement x="0" y="75" width="200" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000003"/>
+                <textFieldExpression><![CDATA["Pedido: " + $P{idPedido}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="200" y="75" width="200" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000004"/>
+                <textFieldExpression><![CDATA["Fecha: " + $P{fechaPedido}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="95" width="200" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000005"/>
+                <textFieldExpression><![CDATA["Cliente: " + $P{nombreCliente}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="200" y="95" width="200" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000006"/>
+                <textFieldExpression><![CDATA["Mesa: " + $P{mesa}]]></textFieldExpression>
+            </textField>
+            
+            <line>
+                <reportElement x="0" y="118" width="555" height="1" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000007"/>
+            </line>
+        </band>
+    </title>
+    
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="260" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000008"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Producto]]></text>
+            </staticText>
+            
+            <staticText>
+                <reportElement x="260" y="0" width="80" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000009"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Cantidad]]></text>
+            </staticText>
+            
+            <staticText>
+                <reportElement x="340" y="0" width="100" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000010"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Precio]]></text>
+            </staticText>
+            
+            <staticText>
+                <reportElement x="440" y="0" width="115" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000011"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Subtotal]]></text>
+            </staticText>
+            
+            <line>
+                <reportElement x="0" y="19" width="555" height="1" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000012"/>
+            </line>
+        </band>
+    </columnHeader>
+    
+    <detail>
+        <band height="22">
+            <textField>
+                <reportElement x="0" y="0" width="260" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000013"/>
+                <textFieldExpression><![CDATA[$F{producto}.getProducto().getNombre()]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="260" y="0" width="80" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000014"/>
+                <textFieldExpression><![CDATA[$F{producto}.getCantidad()]]></textFieldExpression>
+            </textField>
+            
+            <textField pattern="###,##0.00 €">
+                <reportElement x="340" y="0" width="100" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000015"/>
+                <textFieldExpression><![CDATA[$F{producto}.getPrecioUnitario()]]></textFieldExpression>
+            </textField>
+            
+            <textField pattern="###,##0.00 €">
+                <reportElement x="440" y="0" width="115" height="20" uuid="09d1e345-4a5c-4b6e-8d9f-f00000000016"/>
+                <textFieldExpression><![CDATA[
+                    $F{producto}.getPrecioUnitario().multiply(new java.math.BigDecimal($F{producto}.getCantidad()))
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    
+    <summary>
+        <band height="80">
+            <line>
+                <reportElement x="0" y="0" width="555" height="1" uuid="a1111111-b222-4c33-8d44-f55555555556"/>
+            </line>
+            
+            <staticText>
+                <reportElement x="340" y="20" width="100" height="20" uuid="a1111111-b222-4c33-8d44-f55555555557"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[TOTAL:]]></text>
+            </staticText>
+            
+            <textField pattern="###,##0.00 €">
+                <reportElement x="440" y="20" width="115" height="20" uuid="a1111111-b222-4c33-8d44-f55555555558"/>
+                <textFieldExpression><![CDATA[$P{totalPedido}]]></textFieldExpression>
+            </textField>
+            
+            <line>
+                <reportElement x="0" y="60" width="555" height="1" uuid="a1111111-b222-4c33-8d44-f55555555559"/>
+            </line>
+        </band>
+    </summary>
+    
 </jasperReport>

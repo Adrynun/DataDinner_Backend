@@ -34,11 +34,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) 
-            .cors(Customizer.withDefaults()) // Habilitar CORS
+            .cors(Customizer.withDefaults()) 
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // TODO: ajustar para producción
+                .anyRequest().permitAll() 
             )
-            .httpBasic(Customizer.withDefaults()); // Autenticación básica
+            .httpBasic(Customizer.withDefaults());
         return http.build();
     }
 
